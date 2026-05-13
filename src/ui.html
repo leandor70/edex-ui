@@ -33,8 +33,11 @@
         <!-- Load extra CSS -->
         <link rel="stylesheet" href="assets/css/extra_ratios.css" />
 
-        <!-- Load dependency js -->
-        <script src="node_modules/pdfjs-dist/build/pdf.js"></script>
+        <!-- Load dependency js — pdfjs-dist 5.x is ESM-only, assign to window for class access -->
+        <script type="module">
+            import * as pdfjs from './node_modules/pdfjs-dist/build/pdf.mjs';
+            window.pdfjsLib = pdfjs;
+        </script>
         <!-- Load main modules classes -->
         <script src="classes/modal.class.js"></script>
         <script src="classes/terminal.class.js"></script>
