@@ -202,6 +202,9 @@ function createWindow(settings) {
         }
     });
 
+    // @electron/remote v2+ requires explicit per-window opt-in
+    require('@electron/remote/main').enable(win.webContents);
+
     win.loadURL(url.format({
         pathname: path.join(__dirname, 'ui.html'),
         protocol: 'file:',

@@ -98,6 +98,7 @@ class Terminal {
             let themeColor = `rgb(${window.theme.r}, ${window.theme.g}, ${window.theme.b})`;
 
             this.term = new this.xTerm({
+                allowProposedApi: true,
                 cols: 80,
                 rows: 24,
                 cursorBlink: window.theme.terminal.cursorBlink || true,
