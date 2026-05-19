@@ -192,7 +192,6 @@ function createWindow(settings) {
         backgroundColor: '#000000',
         webPreferences: {
             devTools: true,
-	    enableRemoteModule: true,
             contextIsolation: false,
             backgroundThrottling: false,
             webSecurity: true,
@@ -202,6 +201,9 @@ function createWindow(settings) {
             experimentalFeatures: settings.experimentalFeatures || false
         }
     });
+
+    // @electron/remote v2+ requires explicit per-window opt-in
+    require('@electron/remote/main').enable(win.webContents);
 
     win.loadURL(url.format({
         pathname: path.join(__dirname, 'ui.html'),
@@ -347,10 +349,10 @@ app.on('ready', async () => {
 });
 
 app.on('web-contents-created', (e, contents) => {
-    // Prevent creating more than one window
-    contents.on('new-window', (e, url) => {
-        e.preventDefault();
+    // Open external URLs in the default browser instead of a new Electron window
+    contents.setWindowOpenHandler(({ url }) => {
         shell.openExternal(url);
+        return { action: 'deny' };
     });
 
     // Prevent loading something else than the UI
@@ -365,11 +367,15 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
-    tty.close();
-    Object.keys(extraTtys).forEach(key => {
-        if (extraTtys[key] !== null) {
-            extraTtys[key].close();
-        }
-    });
+    if (tty) {
+        tty.close();
+    }
+    if (extraTtys) {
+        Object.keys(extraTtys).forEach(key => {
+            if (extraTtys[key] !== null) {
+                extraTtys[key].close();
+            }
+        });
+    }
     signale.complete("Shutting down...");
 });

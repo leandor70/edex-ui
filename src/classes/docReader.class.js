@@ -1,12 +1,11 @@
 class DocReader {
     constructor(opts) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = './node_modules/pdfjs-dist/build/pdf.worker.js';
+        pdfjsLib.GlobalWorkerOptions.workerSrc = './node_modules/pdfjs-dist/build/pdf.worker.mjs';
         const modalElementId = "modal_" + opts.modalId;
         const path = opts.path;
         const scale = 1;
         const canvas = document.getElementById(modalElementId).querySelector(".pdf_canvas");
         const context = canvas.getContext('2d');
-        const loadingTask = pdfjsLib.getDocument(path);
         let pdfDoc = null,
             pageNum = 1,
             pageRendering = false,
@@ -15,24 +14,21 @@ class DocReader {
 
         this.renderPage = (num) => {
             pageRendering = true;
-            loadingTask.promise.then(function (pdf) {
-                pdfDoc.getPage(num).then(function (page) {
-                    const viewport = page.getViewport({ scale: scale });
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
+            pdfDoc.getPage(num).then((page) => {
+                const viewport = page.getViewport({ scale: scale });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
 
-                    const renderContext = {
-                        canvasContext: context,
-                        viewport: viewport,
-                    };
-                    const renderTask = page.render(renderContext);
-                    renderTask.promise.then(function () {
-                        pageRendering = false;
-                        if (pageNumPending !== null) {
-                            renderPage(pageNumPending);
-                            pageNumPending = null;
-                        }
-                    });
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport,
+                };
+                page.render(renderContext).promise.then(() => {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        this.renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
                 });
             });
             document.getElementById(modalElementId).querySelector(".page_num").textContent = num;
