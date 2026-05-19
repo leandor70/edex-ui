@@ -97,6 +97,10 @@ div#main_shell_innercontainer, div#main_shell_innercontainer pre {
     overflow: hidden;
 }
 
+div#main_shell_innercontainer {
+    position: relative;
+}
+
 div#main_shell_innercontainer pre {
     z-index: -999;
     opacity: 0;
