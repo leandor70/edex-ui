@@ -18,6 +18,19 @@
   <br><br><br>
 </p>
 
+> **This is a community-maintained fork** of the original [eDEX-UI by GitSquared](https://github.com/GitSquared/edex-ui), which was archived in October 2021.
+> The goal of this fork is to keep the project alive and running on modern technology.
+>
+> **What's been updated:**
+> - **Electron** upgraded from v12 to v42
+> - **xterm.js** upgraded from v4 to v6 (migrated to scoped `@xterm/*` packages)
+> - **PDF.js** upgraded to v5 (migrated to ES modules)
+> - **Zero known security vulnerabilities** in all dependencies
+> - Several runtime bug fixes for compatibility with the updated stack
+
+---
+
+
 eDEX-UI is a fullscreen, cross-platform terminal emulator and system monitor that looks and feels like a sci-fi computer interface.
 
 ---
