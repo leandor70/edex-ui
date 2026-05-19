@@ -132,6 +132,21 @@ window._loadTheme = theme => {
 	}
 
     ${window._purifyCSS(theme.injectCSS || "")}
+
+    ${window.settings.enableScanlines ? `body::after {
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        pointer-events: none;
+        z-index: 99999;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.15) 2px,
+            rgba(0, 0, 0, 0.15) 4px
+        );
+    }` : ""}
     </style>`;
 
     window.theme = theme;

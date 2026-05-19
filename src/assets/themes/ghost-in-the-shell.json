@@ -1,0 +1,45 @@
+{
+    "colors": {
+        "r": 0,
+        "g": 200,
+        "b": 255,
+        "black": "#000508",
+        "light_black": "#000d12",
+        "grey": "#001825",
+        "red": "#ff3e5a",
+        "green": "#00ffa0",
+        "yellow": "#ffe000",
+        "blue": "#0055ff",
+        "magenta": "#8800ff",
+        "cyan": "#00c8ff",
+        "white": "#a0d8ef",
+        "brightBlack": "#003355",
+        "brightRed": "#ff7090",
+        "brightGreen": "#55ffcc",
+        "brightYellow": "#ffee55",
+        "brightBlue": "#55aaff",
+        "brightMagenta": "#aa55ff",
+        "brightCyan": "#55eeff",
+        "brightWhite": "#e8f8ff"
+    },
+    "cssvars": {
+        "font_main": "United Sans Medium",
+        "font_main_light": "United Sans Light"
+    },
+    "terminal": {
+        "fontFamily": "Fira Mono",
+        "cursorStyle": "underline",
+        "foreground": "#a0d8ef",
+        "background": "#000d12",
+        "cursor": "#00c8ff",
+        "cursorAccent": "#00ffa0",
+        "selection": "rgba(0,200,255,0.25)"
+    },
+    "globe": {
+        "base": "#000508",
+        "marker": "#00c8ff",
+        "pin": "#00ffa0",
+        "satellite": "#ffe000"
+    },
+    "injectCSS": "body::after { content:''; position:fixed; top:0;left:0;right:0;bottom:0; pointer-events:none; z-index:99998; background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,200,255,0.03) 3px, rgba(0,200,255,0.03) 4px); }"
+}

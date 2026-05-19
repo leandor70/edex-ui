@@ -119,16 +119,37 @@ class Sysinfo {
     updateBattery() {
         window.si.battery().then(bat => {
             let indicator = document.querySelector("#mod_sysinfo > div:last-child > h2");
+            let label = document.querySelector("#mod_sysinfo > div:last-child > h1");
             if (bat.hasBattery) {
+                let tooltip = "";
+                if (bat.cycleCount > 0) tooltip += `Cycles: ${bat.cycleCount}`;
+                if (bat.designedCapacity > 0 && bat.currentCapacity > 0) {
+                    let health = Math.round((bat.currentCapacity / bat.designedCapacity) * 100);
+                    tooltip += (tooltip ? " | " : "") + `Health: ${health}%`;
+                }
+                if (tooltip) indicator.title = tooltip;
+
                 if (bat.isCharging) {
                     indicator.innerHTML = "CHARGE";
+                    label.innerHTML = "POWER";
                 } else if (bat.acConnected) {
                     indicator.innerHTML = "WIRED";
+                    label.innerHTML = "POWER";
                 } else {
-                    indicator.innerHTML = bat.percent+"%";
+                    if (bat.timeRemaining > 0) {
+                        let h = Math.floor(bat.timeRemaining / 60);
+                        let m = bat.timeRemaining % 60;
+                        let timeStr = h > 0 ? `${h}h${String(m).padStart(2,'0')}` : `${m}min`;
+                        indicator.innerHTML = `${bat.percent}%`;
+                        label.innerHTML = timeStr;
+                    } else {
+                        indicator.innerHTML = bat.percent + "%";
+                        label.innerHTML = "POWER";
+                    }
                 }
             } else {
                 indicator.innerHTML = "ON";
+                label.innerHTML = "POWER";
             }
         });
     }

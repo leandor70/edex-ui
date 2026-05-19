@@ -93,7 +93,8 @@ if (!fs.existsSync(settingsFile)) {
         hideDotfiles: false,
         fsListView: false,
         experimentalGlobeFeatures: false,
-        experimentalFeatures: false
+        experimentalFeatures: false,
+        enableScanlines: false
     }, "", 4));
     signale.info(`Default settings written to ${settingsFile}`);
 }

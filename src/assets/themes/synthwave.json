@@ -1,0 +1,45 @@
+{
+    "colors": {
+        "r": 255,
+        "g": 0,
+        "b": 255,
+        "black": "#0d0015",
+        "light_black": "#1a0030",
+        "grey": "#2d0050",
+        "red": "#ff2053",
+        "green": "#0affb2",
+        "yellow": "#ffde00",
+        "blue": "#0080ff",
+        "magenta": "#ff00ff",
+        "cyan": "#00f0ff",
+        "white": "#e0b0ff",
+        "brightBlack": "#4a0080",
+        "brightRed": "#ff5080",
+        "brightGreen": "#50ffcc",
+        "brightYellow": "#ffee55",
+        "brightBlue": "#55aaff",
+        "brightMagenta": "#ff55ff",
+        "brightCyan": "#55ffff",
+        "brightWhite": "#ffffff"
+    },
+    "cssvars": {
+        "font_main": "United Sans Medium",
+        "font_main_light": "United Sans Light"
+    },
+    "terminal": {
+        "fontFamily": "Fira Code",
+        "cursorStyle": "block",
+        "foreground": "#e0b0ff",
+        "background": "#1a0030",
+        "cursor": "#ff00ff",
+        "cursorAccent": "#00f0ff",
+        "selection": "rgba(255,0,255,0.3)"
+    },
+    "globe": {
+        "base": "#0d0015",
+        "marker": "#ff00ff",
+        "pin": "#00f0ff",
+        "satellite": "#ffde00"
+    },
+    "injectCSS": "section, .mod_column { box-shadow: 0 0 8px rgba(255,0,255,0.18), inset 0 0 8px rgba(0,240,255,0.07); }"
+}

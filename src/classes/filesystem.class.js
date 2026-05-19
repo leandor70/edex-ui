@@ -466,7 +466,8 @@ class FilesystemDisplay {
                     e.lastAccessed = "--";
                 }
 
-                filesDOM += `<div class="fs_disp_${e.type}${hidden} animationWait" onclick='${cmdPrefix+cmd+cmdSuffix}'>
+                let copyPathCmd = e.path ? `event.preventDefault();window.electron.clipboard.writeText('${e.path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}');` : `event.preventDefault();`;
+                filesDOM += `<div class="fs_disp_${e.type}${hidden} animationWait" onclick='${cmdPrefix+cmd+cmdSuffix}' oncontextmenu='${copyPathCmd}'>
                                 <svg viewBox="0 0 ${icon.width} ${icon.height}" fill="${this.iconcolor}">
                                     ${icon.svg}
                                 </svg>
