@@ -125,3 +125,16 @@ h3#mod_ramwatcher_swaptext {
     align-self: center;
     text-align: right;
 }
+
+@keyframes ramglitch {
+    0%   { clip-path: inset(0 0 90% 0); transform: translateX(3px); }
+    20%  { clip-path: inset(40% 0 40% 0); transform: translateX(-3px); }
+    40%  { clip-path: inset(70% 0 15% 0); transform: translateX(2px); }
+    60%  { clip-path: inset(15% 0 70% 0); transform: translateX(-2px); }
+    80%  { clip-path: inset(50% 0 30% 0); transform: translateX(1px); }
+    100% { clip-path: inset(0); transform: translateX(0); }
+}
+
+div#mod_ramwatcher.glitching {
+    animation: ramglitch 0.5s steps(1) forwards;
+}

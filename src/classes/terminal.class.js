@@ -8,6 +8,7 @@ class Terminal {
             const {FitAddon} = require("@xterm/addon-fit");
             const {LigaturesAddon} = require("@xterm/addon-ligatures");
             const {WebglAddon} = require("@xterm/addon-webgl");
+            const {SearchAddon} = require("@xterm/addon-search");
             const remote = require("@electron/remote");
             this.Ipc = require("electron").ipcRenderer;
 
@@ -143,6 +144,8 @@ class Terminal {
             this.term.loadAddon(new WebglAddon());
             let ligaturesAddon = new LigaturesAddon();
             this.term.loadAddon(ligaturesAddon);
+            this.searchAddon = new SearchAddon();
+            this.term.loadAddon(this.searchAddon);
             this.term.attachCustomKeyEventHandler(e => {
                 window.keyboard.keydownHandler(e);
                 return true;

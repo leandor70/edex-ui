@@ -120,6 +120,56 @@ div#main_shell_innercontainer pre#terminal3 {
 div#main_shell_innercontainer pre#terminal4 {
     top: -400%;
 }
+div#main_shell_innercontainer pre#terminal5 {
+    top: -500%;
+}
+div#main_shell_innercontainer pre#terminal6 {
+    top: -600%;
+}
+div#main_shell_innercontainer pre#terminal7 {
+    top: -700%;
+}
+div#main_shell_innercontainer pre#terminal8 {
+    top: -800%;
+}
+div#main_shell_innercontainer pre#terminal9 {
+    top: -900%;
+}
+
+div#term_search_overlay {
+    position: absolute;
+    top: 3vh;
+    right: 1vh;
+    z-index: 1000;
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5vh;
+    background: rgba(0, 0, 0, 0.85);
+    border: 0.092vh solid rgba(var(--color_r), var(--color_g), var(--color_b), 0.7);
+    padding: 0.4vh 0.7vh;
+    font-family: var(--font_main);
+    font-size: 1.2vh;
+}
+
+div#term_search_overlay input#term_search_input {
+    background: transparent;
+    border: none;
+    border-bottom: 0.092vh solid rgba(var(--color_r), var(--color_g), var(--color_b), 0.5);
+    color: rgb(var(--color_r), var(--color_g), var(--color_b));
+    font-family: var(--font_main);
+    font-size: 1.2vh;
+    outline: none;
+    width: 14vh;
+    padding: 0.2vh 0;
+}
+
+div#term_search_overlay span#term_search_status {
+    color: rgb(var(--color_r), var(--color_g), var(--color_b));
+    opacity: 0.6;
+    font-size: 1.1vh;
+    min-width: 5vh;
+}
 
 .terminal .xterm-viewport {
     overflow: hidden;

@@ -446,6 +446,8 @@ async function initUI() {
     window.mods.netstat = new Netstat("mod_column_right");
     window.mods.globe = new LocationGlobe("mod_column_right");
     window.mods.conninfo = new Conninfo("mod_column_right");
+    window.mods.diskio = new DiskIO("mod_column_right");
+    window.mods.gpuinfo = new GPUinfo("mod_column_right");
 
     // Fade-in animations
     document.querySelectorAll(".mod_column").forEach(e => {
@@ -473,20 +475,21 @@ async function initUI() {
 
     // Initialize the terminal
     let shellContainer = document.getElementById("main_shell");
+    const _maxTabs = window.settings.maxTabs || 5;
+    let _tabsHTML = `<li id="shell_tab0" onclick="window.focusShellTab(0);" class="active"><p>MAIN SHELL</p></li>`;
+    let _presHTML = `<pre id="terminal0" class="active"></pre>`;
+    for (let _i = 1; _i < _maxTabs; _i++) {
+        _tabsHTML += `<li id="shell_tab${_i}" onclick="window.focusShellTab(${_i});"><p>EMPTY</p></li>`;
+        _presHTML += `<pre id="terminal${_i}"></pre>`;
+    }
     shellContainer.innerHTML += `
-        <ul id="main_shell_tabs">
-            <li id="shell_tab0" onclick="window.focusShellTab(0);" class="active"><p>MAIN SHELL</p></li>
-            <li id="shell_tab1" onclick="window.focusShellTab(1);"><p>EMPTY</p></li>
-            <li id="shell_tab2" onclick="window.focusShellTab(2);"><p>EMPTY</p></li>
-            <li id="shell_tab3" onclick="window.focusShellTab(3);"><p>EMPTY</p></li>
-            <li id="shell_tab4" onclick="window.focusShellTab(4);"><p>EMPTY</p></li>
-        </ul>
+        <ul id="main_shell_tabs">${_tabsHTML}</ul>
         <div id="main_shell_innercontainer">
-            <pre id="terminal0" class="active"></pre>
-            <pre id="terminal1"></pre>
-            <pre id="terminal2"></pre>
-            <pre id="terminal3"></pre>
-            <pre id="terminal4"></pre>
+            ${_presHTML}
+            <div id="term_search_overlay" style="display:none">
+                <input type="search" id="term_search_input" placeholder="Search..." autocomplete="off" />
+                <span id="term_search_status"></span>
+            </div>
         </div>`;
     window.term = {
         0: new Terminal({
@@ -562,7 +565,7 @@ window.focusShellTab = number => {
         window.term[number].resendCWD();
 
         window.fsDisp.followTab();
-    } else if (number > 0 && number <= 4 && window.term[number] !== null && typeof window.term[number] !== "object") {
+    } else if (number > 0 && number <= ((window.settings.maxTabs || 5) - 1) && window.term[number] !== null && typeof window.term[number] !== "object") {
         window.term[number] = null;
 
         document.getElementById("shell_tab"+number).innerHTML = "<p>LOADING...</p>";
@@ -796,6 +799,21 @@ window.openSettings = async () => {
                         </select></td>
                     </tr>
                     <tr>
+                        <td>maxTabs</td>
+                        <td>Maximum number of terminal tabs (1-9, requires restart)</td>
+                        <td><select id="settingsEditor-maxTabs">
+                            ${[1,2,3,4,5,6,7,8,9].map(n => `<option${n === (window.settings.maxTabs||5) ? ' selected' : ''}>${n}</option>`).join('')}
+                        </select></td>
+                    </tr>
+                    <tr>
+                        <td>enableScanlines</td>
+                        <td>Overlay CRT scanlines effect on the UI</td>
+                        <td><select id="settingsEditor-enableScanlines">
+                            <option>${window.settings.enableScanlines || false}</option>
+                            <option>${!window.settings.enableScanlines}</option>
+                        </select></td>
+                    </tr>
+                    <tr>
                         <td>experimentalGlobeFeatures</td>
                         <td>Toggle experimental features for the network globe</td>
                         <td><select id="settingsEditor-experimentalGlobeFeatures">
@@ -861,6 +879,8 @@ window.writeSettingsFile = () => {
         excludeThreadsFromToplist: (document.getElementById("settingsEditor-excludeThreadsFromToplist").value === "true"),
         hideDotfiles: (document.getElementById("settingsEditor-hideDotfiles").value === "true"),
         fsListView: (document.getElementById("settingsEditor-fsListView").value === "true"),
+        maxTabs: Number(document.getElementById("settingsEditor-maxTabs").value),
+        enableScanlines: (document.getElementById("settingsEditor-enableScanlines").value === "true"),
         experimentalGlobeFeatures: (document.getElementById("settingsEditor-experimentalGlobeFeatures").value === "true"),
         experimentalFeatures: (document.getElementById("settingsEditor-experimentalFeatures").value === "true")
     };
@@ -987,33 +1007,24 @@ window.useAppShortcut = action => {
         case "PASTE":
             window.term[window.currentTerm].clipboard.paste();
             return true;
-        case "NEXT_TAB":
-                if (window.term[window.currentTerm+1]) {
-                    window.focusShellTab(window.currentTerm+1);
-                } else if (window.term[window.currentTerm+2]) {
-                    window.focusShellTab(window.currentTerm+2);
-                } else if (window.term[window.currentTerm+3]) {
-                    window.focusShellTab(window.currentTerm+3);
-                } else if (window.term[window.currentTerm+4]) {
-                    window.focusShellTab(window.currentTerm+4);
-                } else {
-                    window.focusShellTab(0);
-                }
+        case "NEXT_TAB": {
+            const _maxT = (window.settings.maxTabs || 5) - 1;
+            for (let _j = window.currentTerm + 1; _j <= _maxT; _j++) {
+                if (window.term[_j]) { window.focusShellTab(_j); return true; }
+            }
+            window.focusShellTab(0);
             return true;
-        case "PREVIOUS_TAB":
-                let i = window.currentTerm || 4;
-                if (window.term[i] && i !== window.currentTerm) {
-                    window.focusShellTab(i);
-                } else if (window.term[i-1]) {
-                    window.focusShellTab(i-1);
-                } else if (window.term[i-2]) {
-                    window.focusShellTab(i-2);
-                } else if (window.term[i-3]) {
-                    window.focusShellTab(i-3);
-                } else if (window.term[i-4]) {
-                    window.focusShellTab(i-4);
-                }
+        }
+        case "PREVIOUS_TAB": {
+            const _maxT2 = (window.settings.maxTabs || 5) - 1;
+            for (let _j = window.currentTerm - 1; _j >= 0; _j--) {
+                if (window.term[_j]) { window.focusShellTab(_j); return true; }
+            }
+            for (let _j = _maxT2; _j > window.currentTerm; _j--) {
+                if (window.term[_j]) { window.focusShellTab(_j); return true; }
+            }
             return true;
+        }
         case "TAB_1":
             window.focusShellTab(0);
             return true;
@@ -1028,6 +1039,21 @@ window.useAppShortcut = action => {
             return true;
         case "TAB_5":
             window.focusShellTab(4);
+            return true;
+        case "TAB_6":
+            window.focusShellTab(5);
+            return true;
+        case "TAB_7":
+            window.focusShellTab(6);
+            return true;
+        case "TAB_8":
+            window.focusShellTab(7);
+            return true;
+        case "TAB_9":
+            window.focusShellTab(8);
+            return true;
+        case "TERM_SEARCH":
+            window.openTermSearch();
             return true;
         case "SETTINGS":
             window.openSettings();
@@ -1059,6 +1085,45 @@ window.useAppShortcut = action => {
     }
 };
 
+window.openTermSearch = () => {
+    let overlay = document.getElementById("term_search_overlay");
+    if (!overlay) return;
+    let isVisible = overlay.style.display !== "none";
+    if (isVisible) {
+        overlay.style.display = "none";
+        if (window.term && window.term[window.currentTerm]) {
+            window.term[window.currentTerm].term.focus();
+        }
+        return;
+    }
+    overlay.style.display = "flex";
+    let input = document.getElementById("term_search_input");
+    if (input) {
+        input.value = "";
+        input.focus();
+        input.oninput = () => {
+            let t = window.term[window.currentTerm];
+            if (!t || !t.searchAddon) return;
+            let status = document.getElementById("term_search_status");
+            let found = t.searchAddon.findNext(input.value, { incremental: true, caseSensitive: false });
+            if (status) status.textContent = input.value.length === 0 ? "" : (found ? "" : "Not found");
+        };
+        input.onkeydown = (e) => {
+            if (e.key === "Escape") {
+                overlay.style.display = "none";
+                if (window.term && window.term[window.currentTerm]) {
+                    window.term[window.currentTerm].term.focus();
+                }
+            } else if (e.key === "Enter") {
+                let t = window.term[window.currentTerm];
+                if (t && t.searchAddon) {
+                    t.searchAddon.findNext(input.value, { caseSensitive: false });
+                }
+            }
+        };
+    }
+};
+
 // Global keyboard shortcuts
 const globalShortcut = remote.globalShortcut;
 globalShortcut.unregisterAll();
@@ -1069,7 +1134,7 @@ window.registerKeyboardShortcuts = () => {
 
         if (cut.type === "app") {
             if (cut.action === "TAB_X") {
-                for (let i = 1; i <= 5; i++) {
+                for (let i = 1; i <= (window.settings.maxTabs || 5); i++) {
                     let trigger = cut.trigger.replace("X", i);
                     let dfn = () => { window.useAppShortcut(`TAB_${i}`) };
                     globalShortcut.register(trigger, dfn);

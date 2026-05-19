@@ -37,8 +37,8 @@ class Cpuinfo {
                 </div>
                 <div>
                     <div>
-                        <h1>${(process.platform === "win32") ? "CORES" : "TEMP"}<br>
-                        <i id="mod_cpuinfo_temp">${(process.platform === "win32") ? data.cores : "--°C"}</i></h1>
+                        <h1>TEMP<br>
+                        <i id="mod_cpuinfo_temp">--°C</i></h1>
                     </div>
                     <div>
                         <h1>SPD<br>
@@ -51,6 +51,10 @@ class Cpuinfo {
                     <div>
                         <h1>TASKS<br>
                         <i id="mod_cpuinfo_tasks">---</i></h1>
+                    </div>
+                    <div>
+                        <h1>LOAD<br>
+                        <i id="mod_cpuinfo_load">--%</i></h1>
                     </div>
                 </div>`;
             this.container.append(innercontainer);
@@ -99,7 +103,7 @@ class Cpuinfo {
             // Init updater
             this.updatingCPUload = false;
             this.updateCPUload();
-            if (process.platform !== "win32") {this.updateCPUtemp();}
+            this.updateCPUtemp();
             this.updatingCPUspeed = false;
             this.updateCPUspeed();
             this.updatingCPUtasks = false;
@@ -107,11 +111,9 @@ class Cpuinfo {
             this.loadUpdater = setInterval(() => {
                 this.updateCPUload();
             }, 500);
-            if (process.platform !== "win32") {
-                this.tempUpdater = setInterval(() => {
-                    this.updateCPUtemp();
-                }, 2000);
-            }
+            this.tempUpdater = setInterval(() => {
+                this.updateCPUtemp();
+            }, 2000);
             this.speedUpdater = setInterval(() => {
                 this.updateCPUspeed();
             }, 1000);
@@ -146,13 +148,27 @@ class Cpuinfo {
                     // Fail silently, DOM element is probably getting refreshed (new theme, etc)
                 }
             });
+            try {
+                let totalAvg = Math.round((average[0] + average[1]) / 2);
+                document.getElementById("mod_cpuinfo_load").innerText = `${totalAvg}%`;
+                if (totalAvg > 85) {
+                    let container = document.getElementById("mod_cpuinfo");
+                    if (container && !container.classList.contains("glitching")) {
+                        container.classList.add("glitching");
+                        setTimeout(() => container.classList.remove("glitching"), 500);
+                    }
+                }
+            } catch(e) {}
             this.updatingCPUload = false;
         });
     }
     updateCPUtemp() {
         window.si.cpuTemperature().then(data => {
             try {
-                document.getElementById("mod_cpuinfo_temp").innerText = `${data.max}°C`;
+                let temp = (data && data.max !== null && data.max !== undefined && data.max > 0)
+                    ? `${data.max}°C`
+                    : "N/A";
+                document.getElementById("mod_cpuinfo_temp").innerText = temp;
             } catch(e) {
                 // See above notice
             }

@@ -94,7 +94,8 @@ if (!fs.existsSync(settingsFile)) {
         fsListView: false,
         experimentalGlobeFeatures: false,
         experimentalFeatures: false,
-        enableScanlines: false
+        enableScanlines: false,
+        maxTabs: 5
     }, "", 4));
     signale.info(`Default settings written to ${settingsFile}`);
 }
@@ -112,6 +113,7 @@ if (!fs.existsSync(shortcutsFile)) {
         { type: "app", trigger: "Ctrl+Shift+L", action: "FS_LIST_VIEW", enabled: true },
         { type: "app", trigger: "Ctrl+Shift+H", action: "FS_DOTFILES", enabled: true },
         { type: "app", trigger: "Ctrl+Shift+P", action: "KB_PASSMODE", enabled: true },
+        { type: "app", trigger: "Ctrl+Shift+R", action: "TERM_SEARCH", enabled: true },
         { type: "app", trigger: "Ctrl+Shift+I", action: "DEV_DEBUG", enabled: false },
         { type: "app", trigger: "Ctrl+Shift+F5", action: "DEV_RELOAD", enabled: true },
         { type: "shell", trigger: "Ctrl+Shift+Alt+Space", action: "neofetch", linebreak: true, enabled: false }
@@ -276,12 +278,12 @@ app.on('ready', async () => {
 
     createWindow(settings);
 
-    // Support for more terminals, used for creating tabs (currently limited to 4 extra terms)
+    // Support for more terminals — pool size matches maxTabs setting
     extraTtys = {};
     let basePort = settings.port || 3000;
     basePort = Number(basePort) + 2;
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 8; i++) {
         extraTtys[basePort+i] = null;
     }
 

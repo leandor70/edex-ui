@@ -466,8 +466,7 @@ class FilesystemDisplay {
                     e.lastAccessed = "--";
                 }
 
-                let copyPathCmd = e.path ? `event.preventDefault();window.electron.clipboard.writeText('${e.path.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}');` : `event.preventDefault();`;
-                filesDOM += `<div class="fs_disp_${e.type}${hidden} animationWait" onclick='${cmdPrefix+cmd+cmdSuffix}' oncontextmenu='${copyPathCmd}'>
+                filesDOM += `<div class="fs_disp_${e.type}${hidden} animationWait" onclick='${cmdPrefix+cmd+cmdSuffix}' oncontextmenu='event.preventDefault();window.fsDisp.contextMenu(${blockIndex},event);'>
                                 <svg viewBox="0 0 ${icon.width} ${icon.height}" fill="${this.iconcolor}">
                                     ${icon.svg}
                                 </svg>
@@ -734,6 +733,107 @@ class FilesystemDisplay {
                     type: block.type
                 });
             }
+        };
+
+        this.contextMenu = (blockIndex, event) => {
+            let existing = document.getElementById("fs_context_menu");
+            if (existing) existing.remove();
+
+            let block = this.cwd[blockIndex];
+            if (!block) return;
+
+            let menu = document.createElement("div");
+            menu.id = "fs_context_menu";
+            menu.style.left = event.clientX + "px";
+            menu.style.top = event.clientY + "px";
+
+            if (block.path) {
+                let copyBtn = document.createElement("div");
+                copyBtn.className = "fs_context_item";
+                copyBtn.innerText = "Copy path";
+                copyBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    window.electron.clipboard.writeText(block.path);
+                    menu.remove();
+                };
+                menu.appendChild(copyBtn);
+            }
+
+            let canModify = block.category === "file" || block.category === "dir" || block.category === "symlink";
+            if (canModify && block.path) {
+                let sep = document.createElement("div");
+                sep.className = "fs_context_separator";
+                menu.appendChild(sep);
+
+                let renameBtn = document.createElement("div");
+                renameBtn.className = "fs_context_item";
+                renameBtn.innerText = "Rename";
+                renameBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    menu.remove();
+                    window.keyboard.detach();
+                    new Modal({
+                        type: "custom",
+                        title: "Rename: " + block.name,
+                        html: `<input id="fs_rename_input" type="text" autocomplete="off" style="width:100%;box-sizing:border-box;background:transparent;border:none;border-bottom:0.092vh solid rgba(var(--color_r),var(--color_g),var(--color_b),0.5);color:rgb(var(--color_r),var(--color_g),var(--color_b));font-family:var(--font_main);font-size:1.4vh;outline:none;padding:0.3vh 0;">`,
+                        buttons: [{ label: "Rename", action: "window._fsPendingOp && window._fsPendingOp()" }]
+                    }, () => {
+                        window._fsPendingOp = null;
+                        window.keyboard.attach();
+                        window.term[window.currentTerm].term.focus();
+                    });
+                    setTimeout(() => {
+                        let input = document.getElementById("fs_rename_input");
+                        if (input) { input.value = block.name; input.select(); input.focus(); }
+                    }, 80);
+                    window._fsPendingOp = () => {
+                        let input = document.getElementById("fs_rename_input");
+                        if (!input) return;
+                        let newName = input.value.trim();
+                        if (!newName || newName === block.name) return;
+                        let newPath = path.join(path.dirname(block.path), newName);
+                        new Promise((resolve, reject) => {
+                            fs.rename(block.path, newPath, err => err ? reject(err) : resolve());
+                        }).then(() => {
+                            this.readFS(this.dirpath);
+                        }).catch(err => console.error("Rename failed:", err));
+                    };
+                };
+                menu.appendChild(renameBtn);
+
+                let deleteBtn = document.createElement("div");
+                deleteBtn.className = "fs_context_item fs_context_danger";
+                deleteBtn.innerText = "Delete";
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    menu.remove();
+                    new Modal({
+                        type: "info",
+                        title: "Delete: " + block.name,
+                        html: `Are you sure you want to permanently delete <strong>${block.name}</strong>?`,
+                        buttons: [{ label: "Delete", action: "window._fsPendingOp && window._fsPendingOp()" }]
+                    });
+                    window._fsPendingOp = () => {
+                        let op = (block.category === "dir")
+                            ? new Promise((resolve, reject) => { fs.rm(block.path, {recursive: true, force: true}, err => err ? reject(err) : resolve()); })
+                            : new Promise((resolve, reject) => { fs.unlink(block.path, err => err ? reject(err) : resolve()); });
+                        op.then(() => {
+                            window._fsPendingOp = null;
+                            this.readFS(this.dirpath);
+                        }).catch(err => {
+                            window._fsPendingOp = null;
+                            console.error("Delete failed:", err);
+                        });
+                    };
+                };
+                menu.appendChild(deleteBtn);
+            }
+
+            if (!menu.children.length) return;
+            document.body.appendChild(menu);
+
+            let closeMenu = () => { if (menu.parentNode) menu.remove(); document.removeEventListener("click", closeMenu); };
+            setTimeout(() => document.addEventListener("click", closeMenu), 0);
         };
     }
 }

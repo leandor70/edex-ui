@@ -248,6 +248,42 @@ div#fs_space_bar > progress:not([value])::after {
     100% { right: 70%; }
 }
 
+div#fs_context_menu {
+    position: fixed;
+    z-index: 9999;
+    background: var(--color_light_black);
+    border: 0.092vh solid rgba(var(--color_r), var(--color_g), var(--color_b), 0.6);
+    font-family: var(--font_main);
+    font-size: 1.2vh;
+    min-width: 12vh;
+    padding: 0.3vh 0;
+}
+
+div.fs_context_item {
+    padding: 0.4vh 1vh;
+    cursor: pointer;
+    color: rgb(var(--color_r), var(--color_g), var(--color_b));
+    white-space: nowrap;
+}
+
+div.fs_context_item:hover {
+    background: rgba(var(--color_r), var(--color_g), var(--color_b), 0.15);
+}
+
+div.fs_context_item.fs_context_danger {
+    opacity: 0.7;
+}
+
+div.fs_context_item.fs_context_danger:hover {
+    background: rgba(200, 50, 50, 0.25);
+    opacity: 1;
+}
+
+div.fs_context_separator {
+    border-top: 0.092vh solid rgba(var(--color_r), var(--color_g), var(--color_b), 0.2);
+    margin: 0.2vh 0;
+}
+
 div#fs_space_bar > progress::-webkit-progress-bar {
     background: rgba(var(--color_r), var(--color_g), var(--color_b), 0.4);
     height: .7vh;

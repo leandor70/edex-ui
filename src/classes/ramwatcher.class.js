@@ -74,6 +74,16 @@ class RAMwatcher {
             let usedSwapGiB = Math.round((data.swapused/1073742000)*10)/10;
             document.getElementById("mod_ramwatcher_swaptext").innerText = `${usedSwapGiB} GiB`;
 
+            // Glitch on high RAM usage
+            let activePercent = Math.round((data.active / data.total) * 100);
+            if (activePercent > 90) {
+                let container = document.getElementById("mod_ramwatcher");
+                if (container && !container.classList.contains("glitching")) {
+                    container.classList.add("glitching");
+                    setTimeout(() => container.classList.remove("glitching"), 500);
+                }
+            }
+
             this.currentlyUpdating = false;
         });
     }

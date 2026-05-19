@@ -106,3 +106,17 @@ div#mod_cpuinfo canvas {
     border-bottom: 0.092vh dashed rgba(var(--color_r), var(--color_g), var(--color_b), 0.3);
     margin: 0.46vh 0vh;
 }
+
+@keyframes cpuglitch {
+    0%   { clip-path: inset(0 0 92% 0); transform: translateX(-3px); }
+    15%  { clip-path: inset(25% 0 55% 0); transform: translateX(3px); }
+    30%  { clip-path: inset(55% 0 25% 0); transform: translateX(-2px); }
+    50%  { clip-path: inset(75% 0 10% 0); transform: translateX(2px); }
+    70%  { clip-path: inset(40% 0 45% 0); transform: translateX(-1px); }
+    85%  { clip-path: inset(10% 0 80% 0); transform: translateX(1px); }
+    100% { clip-path: inset(0); transform: translateX(0); }
+}
+
+div#mod_cpuinfo.glitching {
+    animation: cpuglitch 0.5s steps(1) forwards;
+}
