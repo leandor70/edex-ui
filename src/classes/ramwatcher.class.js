@@ -4,6 +4,7 @@ class RAMwatcher {
 
         // Create DOM
         this.parent = document.getElementById(parentId);
+        const RAM_GAUGE_TRACK = (0.75 * 2 * Math.PI * 38).toFixed(2);
         let modExtContainer = document.createElement("div");
         let ramwatcherDOM = `<div id="mod_ramwatcher_inner">
                 <h1>MEMORY<i id="mod_ramwatcher_info"></i></h1>
@@ -14,6 +15,13 @@ class RAMwatcher {
         }
 
         ramwatcherDOM += `</div>
+                <div id="mod_ramwatcher_gauge_row">
+                    <svg viewBox="0 0 100 100" id="mod_ramwatcher_gauge_svg">
+                        <circle cx="50" cy="50" r="38" id="mod_ramwatcher_gauge_track" stroke-dasharray="${RAM_GAUGE_TRACK} 10000"/>
+                        <circle cx="50" cy="50" r="38" id="mod_ramwatcher_gauge_fill"/>
+                        <text x="50" y="50" id="mod_ramwatcher_gauge_text">0%</text>
+                    </svg>
+                </div>
                 <div id="mod_ramwatcher_swapcontainer">
                     <h1>SWAP</h1>
                     <progress id="mod_ramwatcher_swapbar" max="100" value="0"></progress>
@@ -74,8 +82,15 @@ class RAMwatcher {
             let usedSwapGiB = Math.round((data.swapused/1073742000)*10)/10;
             document.getElementById("mod_ramwatcher_swaptext").innerText = `${usedSwapGiB} GiB`;
 
-            // Glitch on high RAM usage
+            // Update RAM gauge (3.1)
             let activePercent = Math.round((data.active / data.total) * 100);
+            let ramFill = (activePercent / 100) * 179.07;
+            let ramGaugeFill = document.getElementById("mod_ramwatcher_gauge_fill");
+            if (ramGaugeFill) ramGaugeFill.style.strokeDasharray = `${ramFill.toFixed(2)} 10000`;
+            let ramGaugeText = document.getElementById("mod_ramwatcher_gauge_text");
+            if (ramGaugeText) ramGaugeText.textContent = `${activePercent}%`;
+
+            // Glitch on high RAM usage
             if (activePercent > 90) {
                 let container = document.getElementById("mod_ramwatcher");
                 if (container && !container.classList.contains("glitching")) {

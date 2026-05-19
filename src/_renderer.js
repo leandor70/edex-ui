@@ -491,6 +491,13 @@ async function initUI() {
                 <span id="term_search_status"></span>
             </div>
         </div>`;
+    // Session persistence: load saved CWDs (3.3)
+    let _savedSessionCwds = {};
+    try {
+        let _sess = electron.ipcRenderer.sendSync("getSessionState");
+        if (_sess && _sess.cwds) _savedSessionCwds = _sess.cwds;
+    } catch(e) {}
+
     window.term = {
         0: new Terminal({
             role: "client",
@@ -502,6 +509,13 @@ async function initUI() {
     window.term[0].onprocesschange = p => {
         document.getElementById("shell_tab0").innerHTML = `<p>MAIN - ${p}</p>`;
     };
+
+    // Restore last working directory for tab 0 (3.3)
+    if (_savedSessionCwds[0]) {
+        setTimeout(() => {
+            if (window.term[0]) window.term[0].writelr(`cd "${_savedSessionCwds[0]}"`);
+        }, 1800);
+    }
     // Prevent losing hardware keyboard focus on the terminal when using touch keyboard
     window.onmouseup = e => {
         if (window.keyboard.linkedToTerm) window.term[window.currentTerm].term.focus();
@@ -530,9 +544,44 @@ async function initUI() {
 
 window.themeChanger = theme => {
     ipc.send("setThemeOverride", theme);
-    setTimeout(() => {
-        window.location.reload(true);
-    }, 100);
+    try {
+        const newTheme = JSON.parse(fs.readFileSync(path.join(themesDir, theme + ".json"), "utf-8"));
+        window._loadTheme(newTheme);
+
+        // Update xterm terminal colors
+        let r = newTheme.colors.r, g = newTheme.colors.g, b = newTheme.colors.b;
+        let tColor = `rgb(${r}, ${g}, ${b})`;
+        Object.keys(window.term || {}).forEach(k => {
+            let t = window.term[k].term;
+            if (!t) return;
+            t.options.theme = Object.assign({}, t.options.theme, {
+                foreground: tColor,
+                cursor: tColor,
+                selectionBackground: `rgba(${r}, ${g}, ${b}, 0.3)`
+            });
+        });
+
+        // Update Smoothie chart series stroke colors
+        let newStroke = tColor;
+        ["cpuinfo", "conninfo", "diskio"].forEach(modName => {
+            let mod = window.mods && window.mods[modName];
+            if (!mod || !Array.isArray(mod.charts)) return;
+            mod.charts.forEach(chart => {
+                if (chart && chart.seriesSet) {
+                    chart.seriesSet.forEach(s => { if (s.options) s.options.strokeStyle = newStroke; });
+                }
+            });
+        });
+
+        // Re-render filesystem to pick up new icon color
+        if (window.fsDisp && window.fsDisp.cwd && window.fsDisp.cwd.length) {
+            window.fsDisp.iconcolor = tColor;
+            window.fsDisp.render(window.fsDisp.cwd);
+        }
+    } catch(e) {
+        console.error("Hot theme reload failed, falling back to page reload:", e.message);
+        setTimeout(() => { window.location.reload(true); }, 100);
+    }
 };
 
 window.remakeKeyboard = layout => {
@@ -1189,6 +1238,18 @@ window.addEventListener("keyup", e => {
     if (require("os").platform() === "win32" && e.key === "F4" && e.altKey === true) {
         remote.app.quit();
     }
+});
+
+// Session persistence: save CWDs on close (3.3)
+window.addEventListener("beforeunload", () => {
+    let cwds = {};
+    let maxTabs = window.settings.maxTabs || 5;
+    for (let i = 0; i < maxTabs; i++) {
+        if (window.term && window.term[i] && window.term[i].cwd) {
+            cwds[i] = window.term[i].cwd;
+        }
+    }
+    electron.ipcRenderer.send("saveSessionState", { cwds, timestamp: Date.now() });
 });
 
 // Fix double-tap zoom on touchscreens

@@ -61,14 +61,97 @@ div#mod_cpuinfo > div > div {
     margin: 0.278vh 0vh;
 }
 
-div#mod_cpuinfo > div > div:last-child {
+div#mod_cpuinfo_stats {
     width: 95%;
     border-top: 0.092vh dashed rgba(var(--color_r), var(--color_g), var(--color_b), 0.3);
     padding-top: 0.838vh;
 }
-div#mod_cpuinfo > div > div:last-child > div {
+div#mod_cpuinfo_stats > div {
     width: 20%;
     text-align: center;
+}
+
+/* Gauge + heatmap viz row (3.1 + 3.2) */
+div#mod_cpuinfo_viz_row {
+    width: 95%;
+    gap: 0.6vh;
+    padding: 0.3vh 0;
+    align-items: flex-start !important;
+}
+
+#mod_cpuinfo_gauge_svg {
+    width: 7vh;
+    height: 7vh;
+    flex-shrink: 0;
+}
+
+#mod_cpuinfo_gauge_track {
+    fill: none;
+    stroke: rgba(var(--color_r), var(--color_g), var(--color_b), 0.12);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transform: rotate(135deg);
+    transform-origin: 50px 50px;
+}
+
+#mod_cpuinfo_gauge_fill {
+    fill: none;
+    stroke: rgb(var(--color_r), var(--color_g), var(--color_b));
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 0 10000;
+    transform: rotate(135deg);
+    transform-origin: 50px 50px;
+    transition: stroke-dasharray 0.5s ease;
+}
+
+#mod_cpuinfo_gauge_text {
+    fill: rgb(var(--color_r), var(--color_g), var(--color_b));
+    font-family: var(--font_main);
+    font-size: 22px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+/* CPU core heatmap (3.2) */
+div#mod_cpuinfo_heatmap {
+    flex: 1;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(1.8vh, 1fr));
+    gap: 0.2vh;
+    align-content: start;
+    padding-top: 0.2vh;
+}
+
+div.cpu_heat_cell {
+    height: 1.4vh;
+    background: rgba(var(--color_r), var(--color_g), var(--color_b), 0.06);
+    transition: background 0.5s ease;
+    cursor: default;
+}
+
+/* Load average row (3.5) */
+div#mod_cpuinfo_loadavg {
+    width: 95%;
+    justify-content: space-around !important;
+    font-size: 1.05vh;
+    padding: 0.15vh 0 0.3vh;
+    opacity: 0.6;
+    letter-spacing: 0.04vh;
+}
+
+div#mod_cpuinfo_loadavg span {
+    width: auto;
+    position: static;
+    top: auto;
+    right: auto;
+    overflow: visible;
+    display: inline;
+}
+
+div#mod_cpuinfo_loadavg em {
+    font-style: normal;
+    font-family: var(--font_main);
 }
 
 div#mod_cpuinfo h1 {

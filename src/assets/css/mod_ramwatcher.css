@@ -126,6 +126,47 @@ h3#mod_ramwatcher_swaptext {
     text-align: right;
 }
 
+/* RAM gauge (3.1) */
+div#mod_ramwatcher_gauge_row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.3vh 0;
+}
+
+#mod_ramwatcher_gauge_svg {
+    width: 6vh;
+    height: 6vh;
+}
+
+#mod_ramwatcher_gauge_track {
+    fill: none;
+    stroke: rgba(var(--color_r), var(--color_g), var(--color_b), 0.12);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transform: rotate(135deg);
+    transform-origin: 50px 50px;
+}
+
+#mod_ramwatcher_gauge_fill {
+    fill: none;
+    stroke: rgb(var(--color_r), var(--color_g), var(--color_b));
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 0 10000;
+    transform: rotate(135deg);
+    transform-origin: 50px 50px;
+    transition: stroke-dasharray 0.5s ease;
+}
+
+#mod_ramwatcher_gauge_text {
+    fill: rgb(var(--color_r), var(--color_g), var(--color_b));
+    font-family: var(--font_main);
+    font-size: 22px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
 @keyframes ramglitch {
     0%   { clip-path: inset(0 0 90% 0); transform: translateX(3px); }
     20%  { clip-path: inset(40% 0 40% 0); transform: translateX(-3px); }

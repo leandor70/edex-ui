@@ -349,6 +349,25 @@ app.on('ready', async () => {
     ipc.on("setKbOverride", (e, arg) => {
         kbOverride = arg;
     });
+
+    // Session persistence (3.3)
+    const sessionFile = path.join(electron.app.getPath("userData"), "session.json");
+    ipc.on("saveSessionState", (e, state) => {
+        try {
+            fs.writeFileSync(sessionFile, JSON.stringify(state, null, 2));
+        } catch(err) {
+            signale.warn("Could not save session state:", err.message);
+        }
+    });
+    ipc.on("getSessionState", (e) => {
+        try {
+            e.returnValue = fs.existsSync(sessionFile)
+                ? JSON.parse(fs.readFileSync(sessionFile, "utf-8"))
+                : null;
+        } catch(err) {
+            e.returnValue = null;
+        }
+    });
 });
 
 app.on('web-contents-created', (e, contents) => {
