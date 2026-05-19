@@ -39,6 +39,7 @@ const fs = require("fs");
 const electron = require("electron");
 const remote = require("@electron/remote");
 const ipc = electron.ipcRenderer;
+window.electron = electron;
 
 const settingsDir = remote.app.getPath("userData");
 const themesDir = path.join(settingsDir, "themes");
@@ -1125,6 +1126,7 @@ window.onresize = () => {
 // See #413
 window.resizeTimeout = null;
 let electronWin = remote.getCurrentWindow();
+window.electronWin = electronWin;
 electronWin.on("resize", () => {
     if (settings.keepGeometry === false) return;
     clearTimeout(window.resizeTimeout);

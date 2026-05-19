@@ -8,6 +8,7 @@ class Terminal {
             const {FitAddon} = require("@xterm/addon-fit");
             const {LigaturesAddon} = require("@xterm/addon-ligatures");
             const {WebglAddon} = require("@xterm/addon-webgl");
+            const remote = require("@electron/remote");
             this.Ipc = require("electron").ipcRenderer;
 
             this.port = opts.port || 3000;
@@ -117,7 +118,7 @@ class Terminal {
                     background: window.theme.terminal.background,
                     cursor: window.theme.terminal.cursor,
                     cursorAccent: window.theme.terminal.cursorAccent,
-                    selection: window.theme.terminal.selection,
+                    selectionBackground: window.theme.terminal.selection,
                     black: window.theme.colors.black || colorify("#2e3436", themeColor),
                     red: window.theme.colors.red || colorify("#cc0000", themeColor),
                     green: window.theme.colors.green || colorify("#4e9a06", themeColor),
@@ -191,6 +192,7 @@ class Terminal {
             };
 
             this.lastSoundFX = Date.now();
+            this.lastRefit = Date.now();
             this.socket.addEventListener("message", e => {
                 let d = Date.now();
 
@@ -312,7 +314,7 @@ class Terminal {
             this._closed = false;
             this.onclosed = () => {};
             this.onopened = () => {};
-            this.onresize = () => {};
+            this.onresized = () => {};
             this.ondisconnected = () => {};
 
             this._disableCWDtracking = false;
@@ -424,7 +426,7 @@ class Terminal {
                 port: this.port,
                 clientTracking: true,
                 verifyClient: info => {
-                    if (this.wss.clients.length >= 1) {
+                    if (this.wss.clients.size >= 1) {
                         return false;
                     } else {
                         return true;
